@@ -1,0 +1,46 @@
+package test;
+
+import data.DataHelper;
+import data.SQLHelper;
+import org.junit.jupiter.api.*;
+import pages.LoginPage;
+
+import static com.codeborne.selenide.Selenide.open;
+import static data.SQLHelper.cleanAuthCodes;
+import static data.SQLHelper.cleanDatabase;
+
+public class BankFormTest {
+    LoginPage loginPage;
+
+    @AfterEach
+    void tearDown() {
+        cleanAuthCodes();
+    }
+    @AfterAll
+    static void tearDownAll(){
+        cleanDatabase();
+    }
+    @BeforeEach
+    void setUp(){
+        loginPage = open("http://localhost:9999", LoginPage.class);
+    }
+
+    @Test
+    @DisplayName("Should successfully login")
+    void shouldSuccessfullyLogin(){
+        var authInfo = DataHelper.getAuthInfoWithTestData();
+        var verificationPage = loginPage.validLogin(authInfo);
+        verificationPage.verifyVerificationPageVisibility();
+        var verificationCode = SQLHelper.getVerificationCode();
+        verificationPage.validVerify(verificationCode.getCode());
+    }
+
+    @Test
+    @DisplayName("Should get error")
+    void shouldGetError(){
+        var authInfo = DataHelper.generateRandomUser();
+        loginPage.validLogin(authInfo);
+        loginPage.verifyErrorNotification("Ошибка! \nНеверно указан логин или пароль");
+    }
+
+}
