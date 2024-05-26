@@ -36,11 +36,22 @@ public class BankFormTest {
     }
 
     @Test
-    @DisplayName("Should get error")
-    void shouldGetError(){
+    @DisplayName("Should get error user not exist in base")
+    void shouldGetErrorUserNotExistInBase(){
         var authInfo = DataHelper.generateRandomUser();
         loginPage.validLogin(authInfo);
         loginPage.verifyErrorNotification("Ошибка! \nНеверно указан логин или пароль");
+    }
+
+    @Test
+    @DisplayName("Should get error random verification code")
+    void shouldGetErrorRandomVerificationCode(){
+        var authInfo = DataHelper.getAuthInfoWithTestData();
+        var verificationPage = loginPage.validLogin(authInfo);
+        verificationPage.verifyVerificationPageVisibility();
+        var verificationCode = DataHelper.generateRandomVerificationCode();
+        verificationPage.verify(verificationCode.getCode());
+        verificationPage.verifyErrorNotification("Ошибка! \nНеверно указан код! Попробуйте ещё раз.");
     }
 
 }
